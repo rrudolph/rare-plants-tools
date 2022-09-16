@@ -1,5 +1,6 @@
 '''
-Automated building fields for shared rare plant database for California Channel Islands.
+Script for automating adding fields to a new featureclass for shared rare plant database for California Channel Islands.
+Takes excel spreadsheet as input. 
 
 R. Ruddolph
 9/15/22
@@ -25,6 +26,18 @@ import pandas as pd
 from os.path import join
 from icecream import ic
 
+def convert_field_type(field_type):
+    '''
+    Returns the field typed needed to properly generate the field. 
+    The spreadsheet nomentclature was different.
+    '''
+    lookup = {
+        "String": "TEXT",
+        "Short integer": "SHORT",
+        "Double": "DOUBLE",
+        "Date" : "DATE"
+    }
+    return lookup.get(field_type, "Error") 
 
 xlsx = r"C:\GIS\Projects\CHIS_RarePlants\rare-plants-tools\ICBC Rare Plant Fields.xlsx"
 sheet = "NewFieldsAutomated"
@@ -33,8 +46,8 @@ ws = r"C:\GIS\Projects\CHIS_RarePlants\Data Entry Tools\scratch.gdb"
 fc = "brand_new_fc"
 out_fc_path = join(ws, fc)
 
-print("Making featureclass")
-arcpy.management.CreateFeatureclass(ws, fc, "POLYGON", None, "DISABLED", "DISABLED", 'PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Mercator_Auxiliary_Sphere"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],UNIT["Meter",1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision', '', 0, 0, 0, '')
+# print("Making featureclass")
+# arcpy.management.CreateFeatureclass(ws, fc, "POLYGON", None, "DISABLED", "DISABLED", 'PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Mercator_Auxiliary_Sphere"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],UNIT["Meter",1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision', '', 0, 0, 0, '')
 
 df = pd.read_excel(xlsx, sheet_name=sheet, header=0)
 df = df.where(pd.notnull(df), None)
@@ -46,21 +59,21 @@ for index, row in df.iterrows():
     required = True if row['Required'] else False
 
     ic(field_name,
-        field_type,
+        convert_field_type(field_type),
         field_length,
         field_alias,
         required)
 
-    print("Making field")
-    arcpy.management.AddField(out_fc_path, 
-        field_name,
-        field_type,
-        None,
-        None,
-        field_length,
-        field_alias,
-        True,
-        required,
-        None)
+    # print("Making field")
+    # arcpy.management.AddField(out_fc_path, 
+    #     field_name,
+    #     field_type,
+    #     None,
+    #     None,
+    #     field_length,
+    #     field_alias,
+    #     True,
+    #     required,
+    #     None)
 
 
