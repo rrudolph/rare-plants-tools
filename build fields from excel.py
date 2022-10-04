@@ -35,7 +35,7 @@ def convert_field_type(field_type):
         "String": "TEXT",
         "Short integer": "SHORT",
         "Double": "DOUBLE",
-        "Date" : "DATE"
+        "Date" : "DATE",
     }
     return lookup.get(field_type, "Error") 
 
@@ -43,14 +43,19 @@ xlsx = r"C:\GIS\Projects\CHIS_RarePlants\rare-plants-tools\ICBC Rare Plant Field
 sheet = "NewFieldsAutomated"
 
 ws = r"C:\GIS\Projects\CHIS_RarePlants\Data Entry Tools\scratch.gdb"
-fc = "brand_new_fc"
+fc = "brand_new_fc_sp_feet6"
 out_fc_path = join(ws, fc)
 
+# what coordinate system do you want? https://pro.arcgis.com/en/pro-app/latest/arcpy/classes/pdf/projected_coordinate_systems.pdf
+sr = arcpy.SpatialReference(2229) # NAD_1983_StatePlane_California_V_FIPS_0405_Feet
+
+
 print("Making featureclass")
-arcpy.management.CreateFeatureclass(ws, fc, "POLYGON", None, "DISABLED", "DISABLED", 'PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Mercator_Auxiliary_Sphere"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],UNIT["Meter",1.0]];-20037700 -30241100 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision', '', 0, 0, 0, '')
+arcpy.management.CreateFeatureclass(ws, fc, "POLYGON", None, "DISABLED", "DISABLED", sr, '', 0, 0, 0, '')
 
 df = pd.read_excel(xlsx, sheet_name=sheet, header=0)
 df = df.where(pd.notnull(df), None)
+
 for index, row in df.iterrows():
     field_name =  row['FieldName']
     field_type = row['FieldType']
@@ -67,7 +72,7 @@ for index, row in df.iterrows():
     print("Making field")
     arcpy.management.AddField(out_fc_path, 
         field_name,
-        field_type,
+        convert_field_type(field_type),
         None,
         None,
         field_length,
@@ -75,5 +80,4 @@ for index, row in df.iterrows():
         True,
         required,
         None)
-
 
