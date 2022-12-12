@@ -1,3 +1,6 @@
+# Don't post the excel spreadsheets, by request only.
+*.xlsx
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
