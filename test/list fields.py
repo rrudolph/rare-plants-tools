@@ -19,8 +19,6 @@ sheet = "New Fields"
 df = pd.read_excel(xlsx, sheet_name=sheet, header=0)
 df = df.where(pd.notnull(df), None)
 
-
-
 fieldNames = [f for f in arcpy.ListFields(fc)]
 
 data_dict = {}
